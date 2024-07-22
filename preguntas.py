@@ -7,6 +7,7 @@ Este archivo contiene las preguntas que se van a realizar en el laboratorio.
 Utilice los archivos `tbl0.tsv`, `tbl1.tsv` y `tbl2.tsv`, para resolver las preguntas.
 
 """
+
 import pandas as pd
 
 tbl0 = pd.read_csv("tbl0.tsv", sep="\t")
@@ -22,7 +23,7 @@ def pregunta_01():
     40
 
     """
-    return
+    return len(tbl0)
 
 
 def pregunta_02():
@@ -33,7 +34,7 @@ def pregunta_02():
     4
 
     """
-    return
+    return len(tbl0.columns)
 
 
 def pregunta_03():
@@ -50,7 +51,9 @@ def pregunta_03():
     Name: _c1, dtype: int64
 
     """
-    return
+    data = tbl0[['_c1','_c2']].groupby('_c1').count()
+    return data['_c2']
+
 
 
 def pregunta_04():
@@ -65,7 +68,8 @@ def pregunta_04():
     E    4.785714
     Name: _c2, dtype: float64
     """
-    return
+    data= tbl0[['_c1','_c2']].groupby('_c1').mean()
+    return data['_c2']
 
 
 def pregunta_05():
@@ -82,7 +86,8 @@ def pregunta_05():
     E    9
     Name: _c2, dtype: int64
     """
-    return
+    data= tbl0[['_c1','_c2']].groupby(['_c1']).max()
+    return data['_c2']
 
 
 def pregunta_06():
@@ -94,7 +99,9 @@ def pregunta_06():
     ['A', 'B', 'C', 'D', 'E', 'F', 'G']
 
     """
-    return
+    data = tbl1['_c4'].unique().tolist()
+    sorted_data = [letter.upper() for letter in data]
+    return sorted(sorted_data)
 
 
 def pregunta_07():
@@ -110,7 +117,8 @@ def pregunta_07():
     E    67
     Name: _c2, dtype: int64
     """
-    return
+    data = tbl0[['_c1','_c2']].groupby('_c1').sum()
+    return data['_c2']
 
 
 def pregunta_08():
@@ -128,7 +136,9 @@ def pregunta_08():
     39   39   E    5  1998-01-26    44
 
     """
-    return
+    data = tbl0
+    data['suma'] = data['_c0']+data['_c2']
+    return data
 
 
 def pregunta_09():
@@ -146,7 +156,9 @@ def pregunta_09():
     39   39   E    5  1998-01-26  1998
 
     """
-    return
+    data = tbl0
+    data['year'] = [str(row).split('-')[0] for row in data['_c3']] 
+    return data
 
 
 def pregunta_10():
@@ -163,7 +175,12 @@ def pregunta_10():
     3   D                  1:2:3:5:5:7
     4   E  1:1:2:3:3:4:5:5:5:6:7:8:8:9
     """
-    return
+    data_a = tbl0
+    data_b = data_a.groupby('_c1').agg({'_c2': lambda x: sorted(list(x))})
+    for index, row in data_b.iterrows():
+        row['_c2'] = ":".join([str(int) for int in row['_c2']])
+    return data_b
+
 
 
 def pregunta_11():
@@ -182,7 +199,17 @@ def pregunta_11():
     38   38      d,e
     39   39    a,d,f
     """
-    return
+    data = tbl1.copy()
+    data = data.sort_values(by=['_c0','_c4'])
+    dictionary = {}
+    for i in data.index:
+        if data['_c0'][i] not in dictionary:
+            dictionary[data['_c0'][i]] = str(data['_c4'][i])
+        else:
+            dictionary[data['_c0'][i]] += ','+str(data['_c4'][i])
+    df = pd.DataFrame(list(dictionary.items()))
+    df = df.rename(columns={0:'_c0', 1:'_c4'})
+    return df
 
 
 def pregunta_12():
@@ -200,7 +227,17 @@ def pregunta_12():
     38   38                    eee:0,fff:9,iii:2
     39   39                    ggg:3,hhh:8,jjj:5
     """
-    return
+    data = tbl2.copy()
+    data = data.sort_values(by=['_c0','_c5a','_c5b'])
+    dictionary = {}
+    for i in data.index:
+        if data['_c0'][i] not in dictionary:
+            dictionary[data['_c0'][i]] = str(data['_c5a'][i])+':'+str(data['_c5b'][i])
+        else:
+            dictionary[data['_c0'][i]] += ','+str(data['_c5a'][i])+':'+str(data['_c5b'][i])
+    df = pd.DataFrame(list(dictionary.items()))
+    df = df.rename(columns={0:'_c0', 1:'_c5'})
+    return df
 
 
 def pregunta_13():
@@ -217,4 +254,9 @@ def pregunta_13():
     E    275
     Name: _c5b, dtype: int64
     """
-    return
+    data_c0 = tbl0[['_c0','_c1']]
+    data_c2 = tbl2[['_c0','_c5b']]
+    data_merged = pd.merge(data_c0,data_c2)
+    df = data_merged[['_c1','_c5b']]
+    df = df.groupby(['_c1']).sum()
+    return df['_c5b']
